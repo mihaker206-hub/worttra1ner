@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WortTrainer Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+
+:root[data-theme="dark"] {
+  --bg: #09090f; --surface: #12121e; --card: #1a1a2e; --border: #2a2a45;
+  --accent: #6c63ff; --accent2: #ff6584; --text: #e8e8f0; --muted: #6b6b8a;
+  --danger: #ff4757; --success: #43e97b; --shadow: rgba(0,0,0,0.4);
+  --user-bubble: #1e1e3a; --ai-bubble: #12121e;
+}
+:root[data-theme="light"] {
+  --bg: #f0f0f8; --surface: #ffffff; --card: #ffffff; --border: #e0e0ee;
+  --accent: #6c63ff; --accent2: #ff6584; --text: #1a1a2e; --muted: #9090aa;
+  --danger: #ff4757; --success: #22c55e; --shadow: rgba(0,0,0,0.08);
+  --user-bubble: #e8e6ff; --ai-bubble: #ffffff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+[data-theme="dark"] body { background-image: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.07) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.05) 0%, transparent 50%); }
+
+/* HEADER */
+header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px var(--shadow); }
+.logo { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; }
+.logo span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+#nicknameDisplay { background: var(--card); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text); font-size: 12px; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 11px; font-family: 'Syne', sans-serif; transition: all 0.2s; width: auto; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.theme-btn { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 5px 9px; cursor: pointer; font-size: 15px; width: auto; transition: border-color 0.2s; }
+.theme-btn:hover { border-color: var(--accent); transform: none; }
+
+/* LAYOUT */
+.app { display: grid; grid-template-columns: 260px 1fr; height: calc(100vh - 53px); }
+@media(max-width:600px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+/* SIDEBAR */
+.sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-section { padding: 14px; border-bottom: 1px solid var(--border); }
+.sidebar-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 10px; }
+.nav-btn { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; color: var(--muted); border: none; background: transparent; width: 100%; text-align: left; font-family: 'Syne', sans-serif; margin-bottom: 2px; }
+.nav-btn:hover { background: var(--card); color: var(--text); transform: none; opacity: 1; }
+.nav-btn.active { background: rgba(108,99,255,0.12); color: var(--accent); }
+.nav-btn .icon { font-size: 16px; width: 20px; text-align: center; }
+.word-count { font-family: 'Space Mono', monospace; font-size: 10px; background: var(--card); border: 1px solid var(--border); padding: 2px 7px; border-radius: 10px; color: var(--muted); margin-left: auto; }
+
+/* MAIN CONTENT */
+.main { display: flex; flex-direction: column; overflow: hidden; }
+
+/* PANELS */
+.panel { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+.panel.active { display: flex; }
+.panel-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+.panel-scroll::-webkit-scrollbar { width: 4px; }
+.panel-scroll::-webkit-scrollbar-track { background: transparent; }
+.panel-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* CARD */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 12px; box-shadow: 0 4px 20px var(--shadow); transition: background 0.3s; }
+
+/* INPUTS */
+input, select, textarea { width: 100%; padding: 11px 14px; margin-top: 8px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 14px; font-family: 'Syne', sans-serif; outline: none; transition: border-color 0.2s; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+button { width: 100%; padding: 11px 18px; margin-top: 8px; border-radius: 11px; border: none; background: var(--accent); color: white; font-size: 14px; font-weight: 600; font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s; }
+button:hover { opacity: 0.88; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+.btn-s { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.btn-s:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+.btn-voice { background: linear-gradient(135deg, #ff6584, #ff8c69); }
+.btn-danger { background: var(--danger); }
+.label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 14px; margin-bottom: -2px; display: block; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.two-col button { margin-top: 0; }
+
+/* WORD LIST */
+.word-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 6px; transition: border-color 0.2s; }
+.word-item:hover { border-color: var(--accent); }
+.word-de { font-weight: 700; font-size: 14px; flex: 1; }
+.word-ru { color: var(--muted); font-size: 12px; flex: 1; }
+.word-topic { font-size: 10px; background: rgba(108,99,255,0.12); color: var(--accent); padding: 2px 8px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+.srs-badge { font-size: 9px; padding: 2px 7px; border-radius: 20px; font-weight: 700; font-family: 'Space Mono', monospace; white-space: nowrap; }
+.srs-0 { background: rgba(255,71,87,0.15); color: var(--danger); }
+.srs-1 { background: rgba(255,165,0,0.15); color: orange; }
+.srs-2 { background: rgba(255,220,0,0.15); color: #d4a800; }
+.srs-3 { background: rgba(67,233,123,0.15); color: var(--success); }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; width: 24px; height: 24px; padding: 0; margin: 0; font-size: 13px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.del-btn:hover { background: rgba(255,71,87,0.12); color: var(--danger); transform: none; }
+.due-now { border-left: 3px solid var(--accent2) !important; }
+
+/* TEST */
+.progress-bar-wrap { background: var(--surface); border-radius: 10px; height: 3px; margin-bottom: 16px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 10px; transition: width 0.4s; }
+.test-word-big { font-size: 34px; font-weight: 800; text-align: center; padding: 24px 10px 14px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.test-counter { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+.feedback-box { text-align: center; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600; margin-top: 8px; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+.feedback-ok { background: rgba(67,233,123,0.12); color: var(--success); }
+.feedback-fail { background: rgba(255,71,87,0.12); color: var(--danger); }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+.stat-num { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.stat-ok .stat-num { color: var(--success); }
+.stat-fail .stat-num { color: var(--danger); }
+
+/* FLASHCARDS */
+.flashcard { background: linear-gradient(135deg, var(--card), var(--surface)); border: 1px solid var(--border); border-radius: 20px; padding: 44px 28px; text-align: center; cursor: pointer; transition: transform 0.2s; margin-bottom: 12px; }
+.flashcard:hover { transform: translateY(-2px); }
+.flashcard-word { font-size: 34px; font-weight: 800; }
+.flashcard-hint { font-size: 11px; color: var(--muted); margin-top: 12px; font-family: 'Space Mono', monospace; }
+.flashcard-progress { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+
+/* ========== AI CHAT ========== */
+.chat-panel { display: none; flex-direction: column; height: 100%; }
+.chat-panel.active { display: flex; }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.msg { display: flex; flex-direction: column; max-width: 85%; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg.ai { align-self: flex-start; align-items: flex-start; }
+
+.msg-bubble { padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.msg.user .msg-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+.msg.ai .msg-bubble { background: var(--ai-bubble); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+.msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'Space Mono', monospace; padding: 0 4px; }
+
+/* image in chat */
+.msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 6px; max-height: 200px; object-fit: cover; border: 1px solid var(--border); }
+.img-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-family: 'Space Mono', monospace; }
+
+/* AI typing */
+.typing-dots { display: flex; gap: 5px; align-items: center; padding: 14px 16px; background: var(--ai-bubble); border: 1px solid var(--border); border-radius: 18px; border-bottom-left-radius: 4px; width: fit-content; }
+.typing-dots span { width: 7px; height: 7px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+/* CHAT INPUT AREA */
+.chat-input-area { border-top: 1px solid var(--border); background: var(--surface); padding: 12px 16px; }
+
+/* image preview strip */
+.img-previews { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.img-preview-item { position: relative; width: 56px; height: 56px; }
+.img-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); }
+.img-remove { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; min-width: unset; }
+.img-remove:hover { opacity: 0.8; transform: none; }
+
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-textarea { flex: 1; resize: none; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; font-family: 'Syne', sans-serif; outline: none; transition: border-color 0.2s; max-height: 120px; overflow-y: auto; margin: 0; }
+.chat-textarea:focus { border-color: var(--accent); }
+.chat-actions { display: flex; flex-direction: column; gap: 6px; }
+.icon-btn { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0; margin: 0; color: var(--muted); flex-shrink: 0; }
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); transform: none; opacity: 1; }
+.icon-btn.send { background: var(--accent); border-color: var(--accent); color: white; }
+.icon-btn.send:hover { opacity: 0.88; }
+
+.chat-hint { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+#photoInput { display: none; }
+
+/* CSV */
+.csv-hint { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'Space Mono', monospace; background: var(--surface); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); line-height: 1.6; }
+
+/* TOAST */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 22px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 9999; transition: transform 0.3s; pointer-events: none; box-shadow: 0 8px 30px var(--shadow); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+.hidden { display: none; }
+
+/* empty */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state .emoji { font-size: 36px; margin-bottom: 10px; }
+.empty-state p { font-size: 13px; }
+
+/* welcome bubble */
+.welcome-msg { background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(255,101,132,0.08)); border: 1px solid var(--border); border-radius: 18px; border-bottom-left-radius: 4px; padding: 16px 18px; font-size: 14px; line-height: 1.7; max-width: 85%; }
+.welcome-msg strong { color: var(--accent); }
+
+
+/* EXAM MODE */
+.exam-timer { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; text-align: center; padding: 10px; border-radius: 14px; margin-bottom: 10px; }
+.exam-timer.ok { color: var(--success); background: rgba(67,233,123,0.08); border: 1px solid rgba(67,233,123,0.2); }
+.exam-timer.warn { color: orange; background: rgba(255,165,0,0.08); border: 1px solid rgba(255,165,0,0.2); }
+.exam-timer.danger { color: var(--danger); background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.2); animation: pulse 0.5s infinite alternate; }
+@keyframes pulse { from { opacity:1; } to { opacity:0.5; } }
+
+/* STATS */
+.stats-chart { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 12px; }
+.chart-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, var(--accent), rgba(108,99,255,0.4)); transition: height 0.5s ease; min-height: 2px; }
+.bar-label { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; }
+.big-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+.big-stat { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+.big-stat-num { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
+.big-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* SOUND BTN */
+.sound-btn { background: none; border: none; color: var(--muted); cursor: pointer; width: 32px; height: 32px; padding: 0; margin: 0; font-size: 18px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; vertical-align: middle; }
+.sound-btn:hover { color: var(--accent); background: rgba(108,99,255,0.1); transform: none; }
+
+/* Chat grammar pill */
+.grammar-btn { display: inline-block; background: rgba(108,99,255,0.12); color: var(--accent); border: 1px solid rgba(108,99,255,0.25); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+.grammar-btn:hover { background: rgba(108,99,255,0.2); }
+
+/* Chat model indicator */
+.model-badge { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); padding: 2px 7px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-left: 6px; }
+
+/* Chat system prompt toggle */
+.chat-mode-row { display: flex; gap: 6px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.mode-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Syne', sans-serif; transition: all 0.2s; width: auto; margin: 0; }
+.mode-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.mode-btn:hover { border-color: var(--accent); color: var(--accent); opacity: 1; transform: none; }
+.mode-btn.active:hover { color: white; }
+
+/* Chat welcome grammar tip */
+.grammar-tip { background: rgba(108,99,255,0.06); border: 1px solid rgba(108,99,255,0.15); border-radius: 12px; padding: 10px 14px; font-size: 13px; margin-top: 10px; }
+
+/* Exam result */
+.exam-result { text-align: center; padding: 30px 20px; }
+.exam-result .score { font-size: 48px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.exam-result .grade { font-size: 16px; color: var(--muted); margin-top: 4px; }
+
+/* Chat panel with mode bar */
+.chat-panel { display: none; flex-direction: column; height: 100%; }
+.chat-panel.active { display: flex; }
+
+/* Chat input area */
+.chat-input-area { border-top: 1px solid var(--border); background: var(--surface); padding: 12px 16px; }
+
+/* Stats panel scroll */
+#panel-stats .panel-scroll { padding: 16px; }
+
+/* highlight */
+.highlight { animation: highlight 1s ease; }
+@keyframes highlight { 0%,100% { background: var(--card); } 50% { background: rgba(108,99,255,0.15); } }
+
+/* Chat list item */
+/* Chat list item */
+.chat-item { display:flex; align-items:center; gap:6px; padding:8px 10px; border-radius:10px; cursor:pointer; transition:background 0.2s; }
+.chat-item:hover { background: var(--card); }
+.chat-item.active { background: rgba(108,99,255,0.15); }
+.chat-item-title { flex:1; min-width:0; }
+.chat-item-name { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chat-item.active .chat-item-name { color: var(--accent); }
+.chat-item-count { font-size:10px; color:var(--muted); }
+.chat-item-del { background:none; border:none; color:var(--muted); cursor:pointer; width:20px; height:20px; padding:0; margin:0; font-size:13px; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:color 0.2s; }
+.chat-item-del:hover { color:var(--danger); transform:none; }
+.btn-new-chat { background:var(--accent); border:none; color:white; font-size:11px; font-weight:700; padding:4px 10px; border-radius:8px; cursor:pointer; width:auto; margin:0; font-family:"Syne",sans-serif; transition:opacity 0.2s; }
+.btn-new-chat:hover { opacity:0.85; transform:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Wort<span>Trainer</span></div>
+  <div class="header-right">
+    <span id="nicknameDisplay"></span>
+    <button class="btn-ghost" onclick="changeNickname()">Сменить ник</button>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Разделы</div>
+      <button class="nav-btn active" onclick="showPanel('add')" id="nb-add"><span class="icon">➕</span> Добавить слово</button>
+      <button class="nav-btn" onclick="showPanel('list')" id="nb-list"><span class="icon">📋</span> Слова <span class="word-count" id="wordCountBadge">0</span></button>
+      <button class="nav-btn" onclick="showPanel('test')" id="nb-test"><span class="icon">✅</span> Тест</button>
+      <button class="nav-btn" onclick="showPanel('cards')" id="nb-cards"><span class="icon">🃏</span> Карточки</button>
+      <button class="nav-btn" onclick="showPanel('stats')" id="nb-stats"><span class="icon">📊</span> Статистика</button>
+      <button class="nav-btn" onclick="showPanel('exam')" id="nb-exam"><span class="icon">⏱️</span> Экзамен</button>
+    </div>
+    <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="sidebar-title" style="margin-bottom:0;">ИИ-репетитор</div>
+        <button class="btn-new-chat" onclick="newChat()">+ Новый</button>
+      </div>
+      <div id="chatList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:2px;"></div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="panel active" id="panel-add">
+      <div class="panel-scroll">
+        <div class="card">
+          <div style="font-size:15px;font-weight:800;margin-bottom:2px;">Добавить слово</div>
+          <span class="label">Немецкое слово</span>
+          <input id="word" placeholder="z.B. der Hund">
+          <button class="btn-voice" onclick="startVoiceInput()">🎤 Произнести слово</button>
+          <span class="label">Перевод</span>
+          <input id="translation" placeholder="Заполнится автоматически">
+          <span class="label">Тема</span>
+          <input id="topic" placeholder="Работа, B2, Путешествия...">
+          <button onclick="addWord()">Добавить слово</button>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:800;margin-bottom:2px;">📥 Импорт из CSV</div>
+          <div class="csv-hint">Формат: слово,перевод,тема<br>Пример: Hund,собака,Животные</div>
+          <textarea id="csvInput" rows="3" placeholder="Hund,собака,Животные"></textarea>
+          <button class="btn-s" onclick="importCSV()">Импортировать</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-list">
+      <div class="panel-scroll">
+        <select id="filterTopic" onchange="renderList()"><option value="">Все темы</option></select>
+        <div id="wordListContainer" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-test">
+      <div class="panel-scroll">
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+        <div class="card">
+          <div class="test-word-big" id="testWord">—</div>
+          <div class="test-counter" id="testCounter"></div>
+          <input id="answerInput" placeholder="Введи перевод..." onkeydown="if(event.key==='Enter') checkAnswer()">
+          <button onclick="checkAnswer()">Ответить</button>
+          <div class="feedback-box" id="feedback"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box stat-ok"><div class="stat-num" id="correct">0</div><div class="stat-label">Правильно</div></div>
+          <div class="stat-box stat-fail"><div class="stat-num" id="wrong">0</div><div class="stat-label">Ошибки</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-cards">
+      <div class="panel-scroll">
+        <div class="flashcard-progress" id="cardProgress"></div>
+        <div class="flashcard" onclick="flipCard()">
+          <div class="flashcard-word" id="cardWord">—</div>
+          <div class="flashcard-hint" id="cardHint">нажми чтобы перевернуть</div>
+        </div>
+        <div class="two-col">
+          <button class="btn-s" onclick="flipCard()">🔄 Перевернуть</button>
+          <button onclick="nextCard()">Следующая →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-panel" id="panel-chat">
+      <div class="chat-mode-row">
+        <button class="mode-btn active" onclick="setChatMode('tutor')" id="mode-tutor">🎓 Репетитор</button>
+        <button class="mode-btn" onclick="setChatMode('grammar')" id="mode-grammar">📖 Грамматика</button>
+        <button class="mode-btn" onclick="setChatMode('conversation')" id="mode-conversation">💬 Разговор</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg ai">
+          <div class="welcome-msg">
+            👋 Выбери чат слева или нажми <strong>+ Новый</strong>!
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="img-previews" id="imgPreviews"></div>
+        <div class="chat-input-row">
+          <textarea class="chat-textarea" id="chatInput" rows="1"
+            placeholder="Напиши ответ или вопрос..."
+            onkeydown="handleChatKey(event)"
+            oninput="autoResize(this)"></textarea>
+          <div class="chat-actions">
+            <button class="icon-btn" onclick="document.getElementById('photoInput').click()" title="Прикрепить фото">📎</button>
+            <button class="icon-btn send" onclick="sendMessage()">↑</button>
+          </div>
+        </div>
+        <div class="chat-hint">Enter — отправить · Shift+Enter — новая строка · 📎 — фото · <a href="#" onclick="setupApiKey()" style="color:var(--accent);">🔑 Сменить ключ</a></div>
+        <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotos(event)">
+      </div>
+    </div>
+
+    <!-- STATS PANEL -->
+    <div class="panel" id="panel-stats">
+      <div class="panel-scroll">
+        <div class="big-stats" id="bigStats"></div>
+        <div class="stats-chart">
+          <div class="chart-title">Активность за 7 дней</div>
+          <div class="bar-chart" id="activityChart"></div>
+        </div>
+        <div class="stats-chart">
+          <div class="chart-title">Слова по уровням SRS</div>
+          <div class="bar-chart" id="srsChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXAM PANEL -->
+    <div class="panel" id="panel-exam">
+      <div class="panel-scroll">
+        <div id="examContent">
+          <div class="card" style="text-align:center;padding:30px;">
+            <div style="font-size:40px;margin-bottom:12px;">⏱️</div>
+            <div style="font-size:18px;font-weight:800;margin-bottom:8px;">Режим экзамена</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Ответь на все слова как можно быстрее.<br>Таймер считает время — удачи!</div>
+            <select id="examTopicSelect" style="margin-bottom:10px;"><option value="">Все темы</option></select>
+            <button onclick="startExam()">🚀 Начать экзамен</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ── замени на свой ключ с https://aistudio.google.com
+var MISTRAL_KEY = localStorage.getItem('mistral_key') || '';
+var GROQ_KEY = localStorage.getItem('groq_key') || '';
+// legacy support
+if (!MISTRAL_KEY) MISTRAL_KEY = localStorage.getItem('ai_key') || '';
+
+// ── STATE ──
+let words = JSON.parse(localStorage.getItem('words_v2') || '[]');
+let testQueue = [], currentIndex = 0, correct = 0, wrong = 0;
+let cardIndex = 0, showFront = true;
+let pendingImages = [];
+let chatHistory = [];
+let isAITyping = false;
+let currentChatId = null;
+let allChats = JSON.parse(localStorage.getItem('chats_v1') || '{}');
+
+// ── THEME ──
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon();
+
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  const btn = document.querySelector('.theme-btn');
+  if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+}
+
+// ── PROFILE ──
+let nickname = localStorage.getItem('nickname');
+if (!nickname) {
+  nickname = prompt('Введите ваш ник:') || 'Пользователь';
+  localStorage.setItem('nickname', nickname);
+}
+document.getElementById('nicknameDisplay').innerText = '👤 ' + nickname;
+function changeNickname() { localStorage.removeItem('nickname'); location.reload(); }
+
+// ── SAVE ──
+function save() { localStorage.setItem('words_v2', JSON.stringify(words)); updateTopics(); updateWordCount(); }
+function saveChats() { localStorage.setItem('chats_v1', JSON.stringify(allChats)); }
+function updateWordCount() { document.getElementById('wordCountBadge').textContent = words.length; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── PANELS ──
+function showPanel(name) {
+  document.querySelectorAll('.panel, .chat-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+  const nb = document.getElementById('nb-' + name);
+  if (nb) nb.classList.add('active');
+  if (name === 'list') renderList();
+  if (name === 'test') startTest();
+  if (name === 'cards') startCards();
+  if (name === 'stats') renderStats();
+  if (name === 'exam') {
+    var sel = document.getElementById('examTopicSelect');
+    if (sel) {
+      sel.innerHTML = '<option value="">Все темы</option>';
+      var unique = [...new Set(words.map(function(w) { return w.topic; }))];
+      unique.forEach(function(t) { sel.innerHTML += '<option value="' + t + '">' + t + '</option>'; });
+    }
+  }
+}
+
+// ── CHAT STORAGE ──
+function newChat() {
+  const id = 'chat_' + Date.now();
+  const now = new Date();
+  const title = 'Чат ' + now.toLocaleDateString('ru', {day:'2-digit', month:'2-digit'})
+              + ' ' + now.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'});
+  allChats[id] = { id: id, title: title, history: [], messages: [], createdAt: Date.now() };
+  saveChats();
+  loadChat(id);
+  renderChatList();
+}
+
+function deleteChat(id) {
+  delete allChats[id];
+  saveChats();
+  if (currentChatId === id) {
+    currentChatId = null;
+    chatHistory = [];
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '<div class="msg ai"><div class="welcome-msg">👋 Выбери чат слева или нажми <strong>+ Новый</strong>!</div></div>';
+  }
+  renderChatList();
+}
+
+function loadChat(id) {
+  currentChatId = id;
+  chatHistory = (allChats[id].history || []).slice();
+  showPanel('chat');
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+  const msgs = allChats[id].messages || [];
+  if (msgs.length === 0) {
+    var keyStatus = (MISTRAL_KEY ? '✅ Mistral' : '❌ Mistral') + ' · ' + (GROQ_KEY ? '✅ Groq' : '❌ Groq') + ' · <a href="#" onclick="setupApiKey()" style="color:var(--accent);">🔑 Настроить</a>';
+    container.innerHTML = '<div class="msg ai"><div class="welcome-msg">👋 Привет! Я твой ИИ-репетитор по немецкому.<br><br><strong>Что я умею:</strong><br>📸 Читать фото учебников и заметок<br>📝 Задавать вопросы (с ответами или без)<br>✅ Проверять ответы и объяснять ошибки<br>💬 Отвечать на вопросы по немецкому<br><br><strong>Статус:</strong> ' + keyStatus + '</div><div class="msg-time">сейчас</div></div>';
+  } else {
+    msgs.forEach(function(m) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + m.role;
+      const imgHtml = (m.images || []).map(function(url) {
+        return '<div class="img-label">📎 Фото</div><img class="msg-img" src="' + url + '">';
+      }).join('');
+      const safeText = String(m.text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      div.innerHTML = imgHtml + '<div class="msg-bubble">' + safeText + '</div><div class="msg-time">' + m.time + '</div>';
+      container.appendChild(div);
+    });
+  }
+  container.scrollTop = container.scrollHeight;
+  renderChatList();
+}
+
+function renderChatList() {
+  const list = document.getElementById('chatList');
+  list.innerHTML = '';
+  const ids = Object.keys(allChats).sort(function(a, b) {
+    return allChats[b].createdAt - allChats[a].createdAt;
+  });
+  if (ids.length === 0) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:11px;color:var(--muted);padding:8px 4px;line-height:1.6;';
+    hint.textContent = 'Нажми "+ Новый" чтобы начать разговор с репетитором';
+    list.appendChild(hint);
+    return;
+  }
+  ids.forEach(function(id) {
+    const chat = allChats[id];
+    const isActive = id === currentChatId;
+    const item = document.createElement('div');
+    item.className = 'chat-item' + (isActive ? ' active' : '');
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'chat-item-title';
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'chat-item-name';
+    nameDiv.textContent = chat.title;
+
+    const countDiv = document.createElement('div');
+    countDiv.className = 'chat-item-count';
+    countDiv.textContent = (chat.messages || []).length + ' сообщ.';
+
+    titleDiv.appendChild(nameDiv);
+    titleDiv.appendChild(countDiv);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'chat-item-del';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Удалить чат';
+    delBtn.onclick = function(e) { e.stopPropagation(); deleteChat(id); };
+
+    item.appendChild(titleDiv);
+    item.appendChild(delBtn);
+    item.onclick = function(e) { if (e.target !== delBtn) loadChat(id); };
+    list.appendChild(item);
+  });
+}
+
+// ── TRANSLATE ──
+async function translateWord(word) {
+  const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ru&dt=t&q=' + encodeURIComponent(word);
+  const res = await fetch(url);
+  const data = await res.json();
+  return data[0][0][0];
+}
+document.getElementById('word').addEventListener('blur', async function() {
+  const w = document.getElementById('word').value.trim();
+  if (!w) return;
+  document.getElementById('translation').value = 'Перевод...';
+  try { document.getElementById('translation').value = await translateWord(w); }
+  catch(e) { document.getElementById('translation').value = ''; }
+});
+
+// ── VOICE ──
+function startVoiceInput() {
+  if (!('webkitSpeechRecognition' in window)) { alert('Используйте Chrome или Edge'); return; }
+  const r = new webkitSpeechRecognition();
+  r.lang = 'de-DE'; r.start();
+  r.onresult = async function(e) {
+    const w = e.results[0][0].transcript;
+    document.getElementById('word').value = w;
+    document.getElementById('translation').value = 'Перевод...';
+    try { document.getElementById('translation').value = await translateWord(w); }
+    catch(err) { document.getElementById('translation').value = ''; }
+  };
+}
+
+// ── ADD WORD ──
+function addWord() {
+  const word = document.getElementById('word').value.trim();
+  const translation = document.getElementById('translation').value.trim();
+  const topic = document.getElementById('topic').value.trim() || 'Без темы';
+  if (!word || !translation || translation === 'Перевод...') { showToast('⚠️ Заполни слово и перевод!'); return; }
+  words.push({ id: Date.now(), word: word, translation: translation, topic: topic, srs: 0, nextReview: Date.now() });
+  save();
+  document.getElementById('word').value = '';
+  document.getElementById('translation').value = '';
+  document.getElementById('topic').value = '';
+  showToast('✅ Слово добавлено!');
+}
+
+// ── CSV ──
+function importCSV() {
+  const raw = document.getElementById('csvInput').value.trim();
+  if (!raw) { showToast('⚠️ Введи данные в формате CSV'); return; }
+  let count = 0;
+  raw.split('\n').forEach(function(line) {
+    const parts = line.split(',');
+    if (parts.length >= 2) {
+      const word = parts[0].trim(), translation = parts[1].trim();
+      const topic = parts[2] ? parts[2].trim() : 'Импорт';
+      if (word && translation) {
+        words.push({ id: Date.now() + Math.random(), word: word, translation: translation, topic: topic, srs: 0, nextReview: Date.now() });
+        count++;
+      }
+    }
+  });
+  save();
+  document.getElementById('csvInput').value = '';
+  showToast('✅ Импортировано ' + count + ' слов!');
+}
+
+// ── TOPICS ──
+function updateTopics() {
+  const filter = document.getElementById('filterTopic');
+  const selected = filter.value;
+  const unique = [...new Set(words.map(function(w) { return w.topic; }))];
+  filter.innerHTML = '<option value="">Все темы</option>';
+  unique.forEach(function(t) {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    if (t === selected) opt.selected = true;
+    filter.appendChild(opt);
+  });
+}
+
+// ── LIST ──
+function renderList() {
+  const container = document.getElementById('wordListContainer');
+  const filter = document.getElementById('filterTopic').value;
+  const now = Date.now();
+  const filtered = words.filter(function(w) { return !filter || w.topic === filter; });
+  container.innerHTML = '';
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>Слов пока нет.<br>Добавь первое!</p></div>';
+    return;
+  }
+  const srsLabels = ['Новое','Знаю','Хорошо','Отлично'];
+  filtered.forEach(function(w) {
+    const div = document.createElement('div');
+    div.className = 'word-item' + ((w.nextReview||0) <= now ? ' due-now' : '');
+    div.innerHTML = '<div class="word-de">' + w.word + '</div>'
+      + '<div class="word-ru">' + w.translation + '</div>'
+      + '<div class="word-topic">' + w.topic + '</div>'
+      + '<span class="srs-badge srs-' + Math.min(w.srs||0,3) + '">' + srsLabels[Math.min(w.srs||0,3)] + '</span>'
+      + '<button class="del-btn" onclick="deleteWord(' + w.id + ')">✕</button>';
+    container.appendChild(div);
+  });
+}
+function deleteWord(id) { words = words.filter(function(w) { return w.id !== id; }); save(); renderList(); showToast('🗑️ Слово удалено'); }
+
+// ── TEST + SRS ──
+const SRS_INTERVALS = [0, 60000, 600000, 86400000, 259200000];
+function startTest() {
+  if (words.length === 0) { document.getElementById('testWord').innerText = 'Нет слов'; return; }
+  const now = Date.now();
+  const due = words.filter(function(w) { return (w.nextReview||0) <= now; }).sort(function() { return Math.random()-0.5; });
+  const notDue = words.filter(function(w) { return (w.nextReview||0) > now; }).sort(function() { return Math.random()-0.5; });
+  testQueue = due.concat(notDue);
+  currentIndex = 0; correct = 0; wrong = 0;
+  updateStats(); nextWord();
+}
+function nextWord() {
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('feedback').className = 'feedback-box';
+  document.getElementById('answerInput').value = '';
+  if (currentIndex >= testQueue.length) {
+    document.getElementById('testWord').innerText = 'Тест завершён! 🎉';
+    document.getElementById('testCounter').innerText = correct + ' из ' + testQueue.length + ' правильно';
+    document.getElementById('progressBar').style.width = '100%';
+    return;
+  }
+  var tw = testQueue[currentIndex].word;
+  var twSafe = tw.replace(/"/g, '&quot;');
+  document.getElementById('testWord').innerHTML = twSafe + ' <button class="sound-btn" onclick="speakWord(this.dataset.w)" data-w="' + twSafe + '">🔊</button>';
+  document.getElementById('testCounter').innerText = (currentIndex+1) + ' / ' + testQueue.length;
+  document.getElementById('progressBar').style.width = ((currentIndex/testQueue.length)*100) + '%';
+  setTimeout(function() { document.getElementById('answerInput').focus(); }, 100);
+}
+function checkAnswer() {
+  if (currentIndex >= testQueue.length) return;
+  const user = document.getElementById('answerInput').value.trim().toLowerCase();
+  const w = testQueue[currentIndex];
+  const ca = w.translation.toLowerCase();
+  const fb = document.getElementById('feedback');
+  const wa = words.find(function(x) { return x.id === w.id; });
+  if (user === ca) {
+    correct++; fb.innerHTML = '✓ Правильно!'; fb.className = 'feedback-box feedback-ok';
+    if (wa) { wa.srs = Math.min((wa.srs||0)+1,4); wa.nextReview = Date.now()+(SRS_INTERVALS[wa.srs]||SRS_INTERVALS[4]); }
+  } else {
+    wrong++; fb.innerHTML = '✗ Правильно: <strong>' + ca + '</strong>'; fb.className = 'feedback-box feedback-fail';
+    if (wa) { wa.srs = 0; wa.nextReview = Date.now(); }
+  }
+  save(); currentIndex++; updateStats();
+  if (currentIndex === testQueue.length) trackActivity(correct, wrong);
+  setTimeout(nextWord, 1400);
+}
+function updateStats() {
+  document.getElementById('correct').innerText = correct;
+  document.getElementById('wrong').innerText = wrong;
+}
+
+// ── CARDS ──
+function startCards() {
+  if (words.length === 0) { document.getElementById('cardWord').innerText = 'Нет слов'; return; }
+  cardIndex = 0; showFront = true; showCard();
+}
+function showCard() {
+  if (cardIndex >= words.length) {
+    document.getElementById('cardWord').innerText = 'Готово! 🎉';
+    document.getElementById('cardHint').innerText = '';
+    document.getElementById('cardProgress').innerText = 'Все ' + words.length + ' карточек пройдено';
+    return;
+  }
+  const w = words[cardIndex];
+  document.getElementById('cardWord').innerText = showFront ? w.word : w.translation;
+  document.getElementById('cardHint').innerText = showFront ? 'нажми чтобы увидеть перевод' : 'перевод показан';
+  document.getElementById('cardProgress').innerText = (cardIndex+1) + ' / ' + words.length;
+}
+function flipCard() { showFront = !showFront; showCard(); }
+function nextCard() { cardIndex++; showFront = true; showCard(); }
+
+// ── CHAT ──
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+function handlePhotos(event) {
+  Array.from(event.target.files).forEach(function(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      pendingImages.push({ base64: e.target.result.split(',')[1], mime: file.type || 'image/jpeg', url: e.target.result });
+      renderImgPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function removeImage(idx) { pendingImages.splice(idx, 1); renderImgPreviews(); }
+
+function renderImgPreviews() {
+  const container = document.getElementById('imgPreviews');
+  container.innerHTML = '';
+  pendingImages.forEach(function(img, i) {
+    const wrap = document.createElement('div');
+    wrap.className = 'img-preview-item';
+    wrap.innerHTML = '<img src="' + img.url + '"><button class="img-remove" onclick="removeImage(' + i + ')">✕</button>';
+    container.appendChild(wrap);
+  });
+}
+
+function getTime() { return new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }); }
+
+function persistMessage(role, text, imageUrls) {
+  if (!currentChatId || !allChats[currentChatId]) return;
+  allChats[currentChatId].messages = allChats[currentChatId].messages || [];
+  allChats[currentChatId].messages.push({ role: role, text: text, images: imageUrls || [], time: getTime() });
+  saveChats();
+  renderChatList();
+}
+
+function appendUserMessage(text, images) {
+  images = images || [];
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  const imgHtml = images.map(function(img) {
+    return '<div class="img-label">📎 Фото</div><img class="msg-img" src="' + img.url + '">';
+  }).join('');
+  const safeText = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  div.innerHTML = imgHtml + '<div class="msg-bubble">' + safeText + '</div><div class="msg-time">' + getTime() + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  persistMessage('user', text, images.map(function(i) { return i.url; }));
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typingIndicator';
+  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function removeTyping() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
+
+function appendAIMessage(text) {
+  removeTyping();
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  const safeText = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  div.innerHTML = '<div class="msg-bubble">' + safeText + '</div><div class="msg-time">' + getTime() + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  persistMessage('ai', text, []);
+  // Auto-update title from first messages
+  if (allChats[currentChatId]) {
+    const msgs = allChats[currentChatId].messages || [];
+    if (msgs.length <= 3) {
+      const preview = text.replace(/\n/g,' ').slice(0,35);
+      allChats[currentChatId].title = preview + (text.length > 35 ? '…' : '');
+      saveChats();
+      renderChatList();
+    }
+  }
+}
+
+async function sendMessage() {
+  if (isAITyping) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  const imgs = pendingImages.slice();
+  if (!text && imgs.length === 0) return;
+  if (!currentChatId) newChat();
+
+  appendUserMessage(text || '(фото)', imgs);
+  input.value = ''; input.style.height = 'auto';
+  pendingImages = []; renderImgPreviews();
+
+  const userContent = [];
+  imgs.forEach(function(img) {
+    userContent.push({ type: 'image', source: { type: 'base64', media_type: img.mime, data: img.base64 } });
+  });
+  if (text) userContent.push({ type: 'text', text: text });
+
+  chatHistory.push({ role: 'user', content: userContent });
+  if (allChats[currentChatId]) allChats[currentChatId].history = chatHistory.slice();
+
+  isAITyping = true;
+  showTyping();
+
+  try {
+    const systemPrompt = chatModePrompts[chatMode] || chatModePrompts.tutor;
+    var _unused = 'Ты ИИ-репетитор по немецкому языку. Всегда общаешься на русском языке.\n\nКогда пользователь присылает фото, определи что на нём:\n1. ФОТО С ВОПРОСАМИ И ОТВЕТАМИ — используй правильные ответы с фото, задавай вопросы по одному и жди ответа пользователя. После каждого ответа — проверяй и объясняй.\n2. ФОТО ТОЛЬКО С ВОПРОСАМИ — задавай эти вопросы по одному, оценивай ответы как репетитор.\n3. ФОТО ТЕКСТА ИЛИ УЧЕБНИКА — придумай 3-5 вопросов по содержимому, задавай по очереди.\n\nПри нескольких фото — обработай все и составь общий тест.\n\nПроверка ответов:\n- Правильный: кратко похвали, задай следующий вопрос\n- Неправильный: объясни ошибку, покажи правильный ответ\n- Будь дружелюбным и мотивирующим';
+
+    if (!MISTRAL_KEY && !GROQ_KEY) {
+      appendAIMessage('⚠️ Вставь API ключ! Нажми 🔑 внизу.\n\nMistral (с фото): console.mistral.ai\nGroq (без фото, быстрый): console.groq.com');
+      isAITyping = false;
+      return;
+    }
+    if (!MISTRAL_KEY && hasImages) {
+      appendAIMessage('⚠️ Для фото нужен Mistral ключ. Нажми 🔑 и выбери Mistral.\nПолучить: console.mistral.ai');
+      isAITyping = false;
+      return;
+    }
+
+    // Check if message has images
+    var hasImages = imgs.length > 0;
+
+    // Build Mistral messages
+    var mistralMessages = [{ role: 'system', content: systemPrompt }];
+    chatHistory.forEach(function(msg) {
+      var role = msg.role === 'assistant' ? 'assistant' : 'user';
+      if (typeof msg.content === 'string') {
+        mistralMessages.push({ role: role, content: msg.content });
+      } else {
+        var parts = msg.content.map(function(part) {
+          if (part.type === 'text') return { type: 'text', text: part.text };
+          if (part.type === 'image') return { type: 'image_url', image_url: { url: 'data:' + part.source.media_type + ';base64,' + part.source.data } };
+          return null;
+        }).filter(Boolean);
+        if (parts.length > 0) mistralMessages.push({ role: role, content: parts });
+      }
+    });
+
+    // Build Groq messages (text only)
+    var groqMessages = [{ role: 'system', content: systemPrompt }];
+    chatHistory.forEach(function(msg) {
+      var role = msg.role === 'assistant' ? 'assistant' : 'user';
+      var text = typeof msg.content === 'string' ? msg.content : msg.content.map(function(p) { return p.type === 'text' ? p.text : p.type === 'image' ? '[фото]' : ''; }).join(' ');
+      if (text.trim()) groqMessages.push({ role: role, content: text });
+    });
+
+    async function callMistral() {
+      var r = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + MISTRAL_KEY },
+        body: JSON.stringify({ model: 'pixtral-12b-2409', messages: mistralMessages, max_tokens: 1000 })
+      });
+      return r;
+    }
+
+    async function callGroq() {
+      var r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: groqMessages, max_tokens: 1000 })
+      });
+      return r;
+    }
+
+    var response, usedGroq = false;
+    if (!MISTRAL_KEY && GROQ_KEY && !hasImages) {
+      response = await callGroq(); usedGroq = true;
+    } else {
+      response = await callMistral();
+    }
+
+    var rawText = await response.text();
+    var data;
+    try { data = JSON.parse(rawText); } catch(e) { data = {}; }
+    var aiText;
+
+    // Mistral rate limit — try Groq if available
+    if (response.status === 429 && GROQ_KEY) {
+      removeTyping();
+      appendAIMessage('⚡ Mistral занят — переключаюсь на Groq...');
+      showTyping();
+      try {
+        response = await callGroq(); usedGroq = true;
+        rawText = await response.text();
+        try { data = JSON.parse(rawText); } catch(e) { data = {}; }
+      } catch(groqErr) {
+        removeTyping();
+        appendAIMessage('⚠️ Groq ошибка: ' + groqErr.message + '\nПроверь ключ через 🔑');
+        isAITyping = false;
+        return;
+      }
+    } else if (response.status === 429) {
+      // No Groq key or has images — wait and retry Mistral
+      removeTyping();
+      var countEl = document.createElement('div');
+      countEl.className = 'msg ai'; countEl.id = 'countdownMsg';
+      countEl.innerHTML = '<div class="msg-bubble">⏳ Лимит Mistral. Повторяю через <strong id="cdNum">60</strong> сек...<br><small style="color:var(--muted)">Совет: добавь Groq ключ чтобы не ждать!</small></div>';
+      document.getElementById('chatMessages').appendChild(countEl);
+      document.getElementById('chatMessages').scrollTop = 99999;
+      var secs = 60;
+      await new Promise(function(resolve) {
+        var iv = setInterval(function() {
+          secs--;
+          var el = document.getElementById('cdNum');
+          if (el) el.textContent = secs;
+          if (secs <= 0) { clearInterval(iv); resolve(); }
+        }, 1000);
+      });
+      var cm = document.getElementById('countdownMsg'); if (cm) cm.remove();
+      showTyping();
+      response = await callMistral();
+      rawText = await response.text();
+      try { data = JSON.parse(rawText); } catch(e) { data = {}; }
+    }
+
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      aiText = data.choices[0].message.content.trim();
+      if (usedGroq) aiText = '⚡ [Groq] ' + aiText;
+    } else if (data.error) {
+      aiText = '⚠️ Ошибка: ' + (data.error.message || JSON.stringify(data.error));
+    } else if (data.message) {
+      aiText = '⚠️ ' + data.message;
+    } else {
+      aiText = '⚠️ Ответ: ' + rawText.slice(0, 200);
+    }
+    chatHistory.push({ role: 'assistant', content: aiText });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+    if (allChats[currentChatId]) { allChats[currentChatId].history = chatHistory.slice(); saveChats(); }
+    appendAIMessage(aiText);
+  } catch(e) {
+    appendAIMessage('⚠️ Ошибка: ' + e.message + '\nПопробуй ещё раз или нажми 🔑 и проверь ключи.');
+  }
+  isAITyping = false;
+}
+
+// ── API KEY SETUP ──
+function setupApiKey() {
+  var choice = confirm('Нажми OK чтобы вставить Mistral ключ\nНажми Отмена чтобы вставить Groq ключ');
+  if (choice) {
+    var key = prompt('Mistral API ключ:\n\nПолучить бесплатно: console.mistral.ai → API Keys');
+    if (key && key.trim()) {
+      MISTRAL_KEY = key.trim();
+      localStorage.setItem('mistral_key', MISTRAL_KEY);
+      showToast('✅ Mistral ключ сохранён!');
+      if (currentChatId) loadChat(currentChatId);
+    }
+  } else {
+    var key2 = prompt('Groq API ключ:\n\nПолучить бесплатно: console.groq.com → API Keys');
+    if (key2 && key2.trim()) {
+      GROQ_KEY = key2.trim();
+      localStorage.setItem('groq_key', GROQ_KEY);
+      showToast('✅ Groq ключ сохранён!');
+    }
+  }
+}
+
+// ── CHAT MODES ──
+var chatMode = 'tutor';
+var chatModePrompts = {
+  tutor: 'Ты ИИ-репетитор по немецкому языку. Всегда общаешься на русском языке.\n\nКогда пользователь присылает фото, определи что на нём:\n1. ФОТО С ВОПРОСАМИ И ОТВЕТАМИ — задавай вопросы по одному и проверяй ответы\n2. ФОТО ТОЛЬКО С ВОПРОСАМИ — задавай эти вопросы по одному\n3. ФОТО ТЕКСТА — придумай 3-5 вопросов\n\nПроверка: правильный — похвали и следующий вопрос; неправильный — объясни ошибку.',
+  grammar: 'Ты эксперт по немецкой грамматике. Общаешься на русском. Объясняй правила немецкой грамматики понятно и с примерами. Используй таблицы когда нужно. Всегда давай примеры предложений.',
+  conversation: 'Ты собеседник для практики немецкого языка. Веди разговор НА НЕМЕЦКОМ языке, но если пользователь не понимает — объясняй на русском. Исправляй ошибки мягко. Темы: повседневная жизнь, путешествия, работа.'
+};
+
+function setChatMode(mode) {
+  chatMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('mode-' + mode).classList.add('active');
+  var hints = { tutor: '🎓 Режим репетитора — отправляй фото или задавай вопросы', grammar: '📖 Режим грамматики — спроси про артикли, падежи, времена...', conversation: '💬 Режим разговора — пиши на немецком, я отвечу и исправлю ошибки' };
+  showToast(hints[mode]);
+}
+
+// ── SOUND (Web Speech API) ──
+function speakWord(word) {
+  if (!('speechSynthesis' in window)) { showToast('⚠️ Браузер не поддерживает озвучку'); return; }
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(word);
+  u.lang = 'de-DE'; u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+// ── ACTIVITY TRACKING ──
+function trackActivity(correct, wrong) {
+  var today = new Date().toISOString().slice(0,10);
+  var activity = JSON.parse(localStorage.getItem('activity_v1') || '{}');
+  if (!activity[today]) activity[today] = { correct: 0, wrong: 0, total: 0 };
+  activity[today].correct += correct;
+  activity[today].wrong += wrong;
+  activity[today].total += correct + wrong;
+  localStorage.setItem('activity_v1', JSON.stringify(activity));
+}
+
+// ── STATISTICS ──
+function renderStats() {
+  var activity = JSON.parse(localStorage.getItem('activity_v1') || '{}');
+  var totalAnswers = 0, totalCorrect = 0;
+  Object.values(activity).forEach(function(d) { totalAnswers += d.total; totalCorrect += d.correct; });
+  var accuracy = totalAnswers > 0 ? Math.round((totalCorrect/totalAnswers)*100) : 0;
+  var srsLevels = [0,0,0,0,0];
+  words.forEach(function(w) { srsLevels[Math.min(w.srs||0,4)]++; });
+
+  // Big stats
+  document.getElementById('bigStats').innerHTML =
+    '<div class="big-stat"><div class="big-stat-num">' + words.length + '</div><div class="big-stat-lbl">Всего слов</div></div>' +
+    '<div class="big-stat"><div class="big-stat-num">' + accuracy + '%</div><div class="big-stat-lbl">Точность</div></div>' +
+    '<div class="big-stat"><div class="big-stat-num">' + totalAnswers + '</div><div class="big-stat-lbl">Ответов</div></div>';
+
+  // Activity chart - last 7 days
+  var chart = document.getElementById('activityChart');
+  chart.innerHTML = '';
+  var days = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  var maxVal = Math.max(1, Math.max.apply(null, days.map(function(d) { return activity[d] ? activity[d].total : 0; })));
+  days.forEach(function(day) {
+    var val = activity[day] ? activity[day].total : 0;
+    var pct = Math.round((val/maxVal)*100);
+    var label = day.slice(5).replace('-', '/');
+    var wrap = document.createElement('div'); wrap.className = 'bar-wrap';
+    wrap.innerHTML = '<div class="bar" style="height:' + Math.max(pct,2) + '%"></div><div class="bar-label">' + label + '</div>';
+    chart.appendChild(wrap);
+  });
+
+  // SRS chart
+  var srsChart = document.getElementById('srsChart');
+  srsChart.innerHTML = '';
+  var srsLabels = ['Новое','Знаю','Хорошо','Отлично','Мастер'];
+  var srsColors = ['var(--danger)','orange','#f0c040','var(--success)','var(--accent)'];
+  var maxSrs = Math.max(1, Math.max.apply(null, srsLevels));
+  srsLevels.forEach(function(val, i) {
+    var pct = Math.round((val/maxSrs)*100);
+    var wrap = document.createElement('div'); wrap.className = 'bar-wrap';
+    wrap.innerHTML = '<div class="bar" style="height:' + Math.max(pct,2) + '%;background:' + srsColors[i] + '"></div><div class="bar-label">' + srsLabels[i] + '</div>';
+    srsChart.appendChild(wrap);
+  });
+}
+
+// ── EXAM MODE ──
+var examQueue = [], examIndex = 0, examCorrect = 0, examWrong = 0;
+var examTimer = null, examSeconds = 0, examStartTime = 0;
+
+function startExam() {
+  var topic = document.getElementById('examTopicSelect').value;
+  var pool = topic ? words.filter(function(w) { return w.topic === topic; }) : words.slice();
+  if (pool.length === 0) { showToast('⚠️ Нет слов для экзамена!'); return; }
+  examQueue = pool.sort(function() { return Math.random()-0.5; });
+  examIndex = 0; examCorrect = 0; examWrong = 0;
+  examStartTime = Date.now(); examSeconds = 0;
+  renderExamQuestion();
+  examTimer = setInterval(function() {
+    examSeconds++;
+    var el = document.getElementById('examTimerDisplay');
+    if (el) {
+      var mins = Math.floor(examSeconds/60);
+      var secs = examSeconds % 60;
+      el.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+      el.parentElement.className = 'exam-timer ' + (examSeconds < 60 ? 'ok' : examSeconds < 120 ? 'warn' : 'danger');
+    }
+  }, 1000);
+}
+
+function renderExamQuestion() {
+  if (examIndex >= examQueue.length) { finishExam(); return; }
+  var w = examQueue[examIndex];
+  var content = document.getElementById('examContent');
+  content.innerHTML =
+    '<div class="exam-timer ok" id="examTimerWrap"><span id="examTimerDisplay">00:00</span></div>' +
+    '<div class="progress-bar-wrap"><div class="progress-bar" id="examBar" style="width:' + Math.round((examIndex/examQueue.length)*100) + '%"></div></div>' +
+    '<div class="card" id="examCard"></div>' +
+    '<div class="stats-row">' +
+      '<div class="stat-box stat-ok"><div class="stat-num">' + examCorrect + '</div><div class="stat-label">Правильно</div></div>' +
+      '<div class="stat-box stat-fail"><div class="stat-num">' + examWrong + '</div><div class="stat-label">Ошибки</div></div>' +
+    '</div>';
+  var card = document.getElementById('examCard');
+  var counter = document.createElement('div');
+  counter.style.cssText = 'text-align:center;font-size:11px;color:var(--muted);margin-bottom:6px;';
+  counter.textContent = (examIndex+1) + ' / ' + examQueue.length;
+  var wordEl = document.createElement('div');
+  wordEl.className = 'test-word-big';
+  wordEl.textContent = w.word;
+  var soundBtn = document.createElement('button');
+  soundBtn.className = 'sound-btn';
+  soundBtn.textContent = '🔊';
+  soundBtn.style.cssText = 'display:block;margin:0 auto 10px;';
+  soundBtn.onclick = function() { speakWord(w.word); };
+  var inp = document.createElement('input');
+  inp.id = 'examInput';
+  inp.placeholder = 'Введи перевод...';
+  inp.onkeydown = function(e) { if (e.key === 'Enter') checkExam(); };
+  var btn = document.createElement('button');
+  btn.textContent = 'Ответить';
+  btn.onclick = checkExam;
+  var fb = document.createElement('div');
+  fb.className = 'feedback-box'; fb.id = 'examFeedback';
+  card.appendChild(counter); card.appendChild(wordEl); card.appendChild(soundBtn);
+  card.appendChild(inp); card.appendChild(btn); card.appendChild(fb);
+  setTimeout(function() { inp.focus(); }, 100);
+}
+
+function checkExam() {
+  var inp = document.getElementById('examInput');
+  if (!inp) return;
+  var user = inp.value.trim().toLowerCase();
+  var w = examQueue[examIndex];
+  var ca = w.translation.toLowerCase();
+  var fb = document.getElementById('examFeedback');
+  if (user === ca) {
+    examCorrect++;
+    fb.innerHTML = '✓ Правильно!'; fb.className = 'feedback-box feedback-ok';
+  } else {
+    examWrong++;
+    fb.innerHTML = '✗ ' + ca; fb.className = 'feedback-box feedback-fail';
+  }
+  examIndex++;
+  setTimeout(renderExamQuestion, 1000);
+}
+
+function finishExam() {
+  clearInterval(examTimer);
+  var total = examQueue.length;
+  var pct = Math.round((examCorrect/total)*100);
+  var mins = Math.floor(examSeconds/60);
+  var secs = examSeconds % 60;
+  var timeStr = (mins > 0 ? mins + ' мин ' : '') + secs + ' сек';
+  var grade = pct >= 90 ? 'Отлично! 🏆' : pct >= 70 ? 'Хорошо! 👍' : pct >= 50 ? 'Неплохо 💪' : 'Нужно повторить 📚';
+  trackActivity(examCorrect, examWrong);
+  document.getElementById('examContent').innerHTML =
+    '<div class="card exam-result">' +
+      '<div class="score">' + pct + '%</div>' +
+      '<div class="grade">' + grade + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin:12px 0;">' + examCorrect + ' из ' + total + ' · ' + timeStr + '</div>' +
+      '<button onclick="showPanel(&quot;exam&quot;)">Попробовать снова</button>' +
+    '</div>';
+}
+
+// ── INIT ──
+updateTopics();
+updateWordCount();
+renderChatList();
+const chatIds = Object.keys(allChats).sort(function(a,b) { return allChats[b].createdAt - allChats[a].createdAt; });
+if (chatIds.length > 0) loadChat(chatIds[0]);
+</script>
+</body>
+</html>
